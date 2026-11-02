@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300" width="1000" height="300" role="img" aria-labelledby="t d">
+<title id="t">Typical pedal signal chain</title>
+<desc id="d">Diagram of seven boxes in a row from guitar to amp: tuner, wah or filter, compressor, overdrive or distortion, modulation, delay, reverb. A bracket marks the first four as gain and tone shaping and the last three as time-based effects.</desc>
+<rect width="1000" height="300" rx="12" fill="#26231f"/>
+<text x="20" y="150" font-family="Arial, sans-serif" font-size="13" fill="#f2e6cf" text-anchor="start">GUITAR</text>
+<rect x="70" y="95" width="104" height="90" rx="10" fill="#ffc233" stroke="#0e0d0b" stroke-width="3"/>
+<circle cx="86" cy="111" r="11" fill="#26231f"/><text x="86" y="116" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffc233">1</text>
+<text x="122.0" y="153" text-anchor="middle" font-family="Georgia, serif" font-size="14" font-weight="bold" fill="#1b1916">Tuner</text>
+<line x1="174" y1="140.0" x2="196" y2="140.0" stroke="#f2e6cf" stroke-width="4"/>
+<rect x="196" y="95" width="104" height="90" rx="10" fill="#ffc233" stroke="#0e0d0b" stroke-width="3"/>
+<circle cx="212" cy="111" r="11" fill="#26231f"/><text x="212" y="116" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffc233">2</text>
+<text x="248.0" y="145" text-anchor="middle" font-family="Georgia, serif" font-size="14" font-weight="bold" fill="#1b1916">Wah /</text>
+<text x="248.0" y="161" text-anchor="middle" font-family="Georgia, serif" font-size="14" font-weight="bold" fill="#1b1916">Filter</text>
+<line x1="300" y1="140.0" x2="322" y2="140.0" stroke="#f2e6cf" stroke-width="4"/>
+<rect x="322" y="95" width="104" height="90" rx="10" fill="#ffc233" stroke="#0e0d0b" stroke-width="3"/>
+<circle cx="338" cy="111" r="11" fill="#26231f"/><text x="338" y="116" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffc233">3</text>
+<text x="374.0" y="153" text-anchor="middle" font-family="Georgia, serif" font-size="14" font-weight="bold" fill="#1b1916">Compressor</text>
+<line x1="426" y1="140.0" x2="448" y2="140.0" stroke="#f2e6cf" stroke-width="4"/>
+<rect x="448" y="95" width="104" height="90" rx="10" fill="#ffc233" stroke="#0e0d0b" stroke-width="3"/>
+<circle cx="464" cy="111" r="11" fill="#26231f"/><text x="464" y="116" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffc233">4</text>
+<text x="500.0" y="145" text-anchor="middle" font-family="Georgia, serif" font-size="14" font-weight="bold" fill="#1b1916">Overdrive /</text>
+<text x="500.0" y="161" text-anchor="middle" font-family="Georgia, serif" font-size="14" font-weight="bold" fill="#1b1916">Distortion</text>
+<line x1="552" y1="140.0" x2="574" y2="140.0" stroke="#f2e6cf" stroke-width="4"/>
+<rect x="574" y="95" width="104" height="90" rx="10" fill="#f2e6cf" stroke="#0e0d0b" stroke-width="3"/>
+<circle cx="590" cy="111" r="11" fill="#26231f"/><text x="590" y="116" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffc233">5</text>
+<text x="626.0" y="153" text-anchor="middle" font-family="Georgia, serif" font-size="14" font-weight="bold" fill="#1b1916">Modulation</text>
+<line x1="678" y1="140.0" x2="700" y2="140.0" stroke="#f2e6cf" stroke-width="4"/>
+<rect x="700" y="95" width="104" height="90" rx="10" fill="#f2e6cf" stroke="#0e0d0b" stroke-width="3"/>
+<circle cx="716" cy="111" r="11" fill="#26231f"/><text x="716" y="116" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffc233">6</text>
+<text x="752.0" y="153" text-anchor="middle" font-family="Georgia, serif" font-size="14" font-weight="bold" fill="#1b1916">Delay</text>
+<line x1="804" y1="140.0" x2="826" y2="140.0" stroke="#f2e6cf" stroke-width="4"/>
+<rect x="826" y="95" width="104" height="90" rx="10" fill="#f2e6cf" stroke="#0e0d0b" stroke-width="3"/>
+<circle cx="842" cy="111" r="11" fill="#26231f"/><text x="842" y="116" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#ffc233">7</text>
+<text x="878.0" y="153" text-anchor="middle" font-family="Georgia, serif" font-size="14" font-weight="bold" fill="#1b1916">Reverb</text>
+<line x1="50" y1="140.0" x2="70" y2="140.0" stroke="#f2e6cf" stroke-width="4"/>
+<line x1="930" y1="140.0" x2="958" y2="140.0" stroke="#f2e6cf" stroke-width="4"/>
+<text x="960" y="145.0" font-family="Arial, sans-serif" font-size="13" fill="#f2e6cf">AMP</text>
+<path d="M70 215 v10 H552 v-10" fill="none" stroke="#ffc233" stroke-width="3"/>
+<text x="311.0" y="252" text-anchor="middle" font-family="Georgia, serif" font-size="16" fill="#ffc233">Gain and tone shaping</text>
+<path d="M574 215 v10 H930 v-10" fill="none" stroke="#f2e6cf" stroke-width="3"/>
+<text x="752.0" y="252" text-anchor="middle" font-family="Georgia, serif" font-size="16" fill="#f2e6cf">Time-based effects</text>
+<text x="500" y="55" text-anchor="middle" font-family="Georgia, serif" font-size="20" fill="#f2e6cf">A common starting signal chain</text>
+</svg>
