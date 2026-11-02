@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Pedalboard 101: how the order of guitar pedals shapes your tone. A hand-coded page by Jamon Ireland for BYU IS 201.">
+<title>Pedalboard 101: How Guitar Pedal Order Shapes Your Tone</title>
+<link rel="stylesheet" href="css/scratch.css">
+<script type="module" src="https://public.tableau.com/javascripts/api/tableau.embedding.3.latest.min.js"></script>
+</head>
+<body id="top">
+<nav class="site-nav" aria-label="Main navigation">
+<ul>
+<li class="brand">Jamon Ireland</li>
+<li><a href="index.html">Professional site</a></li>
+<li><a href="resume.html">Resume</a></li>
+<li><a href="about.html">About</a></li>
+<li><a href="scratch.html" aria-current="page">Pedalboard 101</a></li>
+</ul>
+</nav>
+<main class="page">
+<div id="hero">
+<img src="images/scratch-hero.svg" width="1200" height="340" alt="Illustration of three guitar pedals labeled drive, delay and reverb, connected by patch cables on a dark pedalboard.">
+<div class="hero-text">
+<h1>Pedalboard 101: How Guitar Pedal Order Shapes Your Tone</h1>
+<p>The same three pedals can sound polished or messy depending on one thing: the order you plug them in. This page walks through a common signal chain, explains the reasoning behind it, and shows where it is worth breaking the rules.</p>
+<p class="byline">I made this page while learning HTML and CSS for IS 201. I am a Marketing student at BYU and I play guitar, so tone is a topic I enjoy digging into.</p>
+</div>
+</div>
+<div id="jump-menu">
+<h2>Jump to</h2>
+<ul>
+<li><a href="#basics">The basic idea</a></li>
+<li><a href="#chain">The signal chain</a></li>
+<li><a href="#why">Why this order works</a></li>
+<li><a href="#break-rules">Breaking the rules</a></li>
+<li><a href="#video">Video</a></li>
+<li><a href="#tableau-box">Live Tableau demo</a></li>
+<li><a href="#app-cta">Web app</a></li>
+</ul>
+</div>
+<section id="basics">
+<h2>The basic idea</h2>
+<p>A guitar signal travels in a line. It leaves the pickups, passes through each pedal in turn, and ends at the amplifier. Every pedal receives whatever the previous one produced, so each one changes what the next one has to work with.</p>
+<p>That is why order matters. A delay placed after an overdrive repeats the distorted sound. A delay placed before it feeds the repeats into the distortion, which fuzzes them together. Neither is wrong, but they sound very different, and one is usually closer to what players are after.</p>
+<div class="callout">
+<p><strong>Rule of thumb:</strong> shape the sound of the guitar first, then add space and time. Tuning and dynamics come early, gain comes in the middle, and time-based effects such as delay and reverb come last.</p>
+</div>
+</section>
+<section id="chain">
+<h2>The signal chain, step by step</h2>
+<p>Here is one widely used starting order. Treat it as a map, not a law.</p>
+<figure>
+<img src="images/scratch-signal-chain.svg" width="1000" height="300" alt="Diagram of a seven-step signal chain from guitar to amp: tuner, wah or filter, compressor, overdrive or distortion, modulation, delay, reverb. The first four are grouped as gain and tone shaping, the last three as time-based effects.">
+<figcaption>Figure 1. A common starting signal chain, from guitar (left) to amp (right).</figcaption>
+</figure>
+<ol class="chain-steps">
+<li>
+<strong>Tuner</strong>
+<ul>
+<li>Examples: a standard pedal tuner or a polyphonic tuner pedal.</li>
+<li>Goes first so it reads the clean, unprocessed signal, which gives the most accurate pitch reading.</li>
+<li>Many tuners mute the output when switched on, so you can tune silently on stage.</li>
+</ul>
+</li>
+<li>
+<strong>Wah and filter</strong>
+<ul>
+<li>Examples: a wah-wah pedal, an envelope filter.</li>
+<li>These respond to the pickups and to how hard you pick, so they like a clean, direct signal.</li>
+<li>In front of a distortion, a wah gives the classic vocal sweep. After it, the effect is more subtle and can sound thin or harsh.</li>
+</ul>
+</li>
+<li>
+<strong>Compressor</strong>
+<ul>
+<li>Examples: an optical compressor, a sustainer.</li>
+<li>Evens out the difference between loud and soft notes, which tightens clean playing and feeds drive pedals a steadier level.</li>
+<li>Some players place it later in the chain instead, so it smooths the result of the drive pedals. Both are common.</li>
+</ul>
+</li>
+<li>
+<strong>Overdrive, distortion and fuzz</strong>
+<ul>
+<li>Examples: a mild overdrive for push, a distortion for heavier saturation, a fuzz for thick, buzzy tone.</li>
+<li>This is the heart of the guitar sound. Everything after it processes the already-driven tone.</li>
+<li>Stacking more than one? Many players put the lower-gain pedal first to push the higher-gain one harder.</li>
+<li>Fuzz pedals are often placed very early because they can react badly to other pedals sitting in front of them.</li>
+</ul>
+</li>
+<li>
+<strong>Modulation</strong>
+<ul>
+<li>Examples: chorus, phaser, flanger, tremolo.</li>
+<li>These add movement by shifting pitch, phase or volume. Placed after gain, they swirl a finished tone.</li>
+<li>Placed before heavy gain, the distortion can exaggerate the movement and make it sound rough.</li>
+</ul>
+</li>
+<li>
+<strong>Delay</strong>
+<ul>
+<li>Examples: analog-style delay, digital delay, tape-style echo.</li>
+<li>Creates repeats of what you just played, including its distortion and modulation.</li>
+<li>Placing it after gain keeps each repeat clear instead of turning into a blur.</li>
+</ul>
+</li>
+<li>
+<strong>Reverb</strong>
+<ul>
+<li>Examples: spring, plate or hall reverb pedals.</li>
+<li>Simulates a room around everything that came before it, so it usually sits last.</li>
+<li>With reverb after delay, each repeat gets its own natural-sounding tail, as if the whole sound happened in one space.</li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="why">
+<h2>Why this order works</h2>
+<p>Three ideas explain most of the standard order.</p>
+<div class="card-grid">
+<div class="card">
+<h3>Gain before time</h3>
+<p>Distortion squashes and adds harmonics to whatever enters it. If a delay or reverb comes first, the distortion smears the echoes together and the result turns muddy. Drive first, then add space.</p>
+</div>
+<div class="card">
+<h3>Dynamics early</h3>
+<p>Tuners, wahs and compressors work best when they hear the guitar itself. Pedals that rely on your picking strength need a clean, consistent signal to respond to.</p>
+</div>
+<div class="card">
+<h3>Space last</h3>
+<p>Reverb and delay describe the room the sound lives in. Putting them at the end applies that room to the whole sound, which is how a real performance space behaves.</p>
+</div>
+</div>
+</section>
+<section id="break-rules">
+<h2>When to break the rules</h2>
+<p>Plenty of well-known sounds come from doing the opposite of the textbook. Reverb before a fuzz or overdrive can create a huge, ambient wash. A delay before distortion can produce thick, stacked textures. Modulation after a delay makes the repeats wobble and drift.</p>
+<p>A few practical notes:</p>
+<ul>
+<li><strong>Volume pedal:</strong> placed early, it controls how hard you drive the pedals after it. Placed last, it fades the entire sound in or out.</li>
+<li><strong>Amp effects loop:</strong> if your amp is driven by its own preamp distortion, time-based effects often sound cleaner in the loop than in front of the amp.</li>
+<li><strong>Power and cables:</strong> noise problems sometimes come from power supplies and cable routing, not from the order itself.</li>
+</ul>
+<p>The best way to learn is to move one pedal at a time and listen. Your ears are the final judge.</p>
+</section>
+<section id="video-box">
+<h2 id="video">Watch: effects pedal order explained</h2>
+<p>This video is a good companion to the sections above, since hearing the difference makes the reasoning easier to follow.</p>
+<div class="video-wrap">
+<iframe src="https://www.youtube.com/embed/3lEZb9MZC1c" title="Effects Pedal Order Explained" allowfullscreen loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+</div>
+</section>
+<section id="tableau-box">
+<h2>Live Tableau demo: storm tracking</h2>
+<p>This interactive dashboard has nothing to do with pedals. It is here to show that a live Tableau Public visualization can be embedded in a plain, hand-coded HTML page. Try hovering over the marks or using the filters.</p>
+<div class="tableau-frame">
+<tableau-viz id="tableauViz" src="https://public.tableau.com/views/RegionalSampleWorkbook/Storms" toolbar="bottom" hide-tabs></tableau-viz>
+</div>
+<p class="source-note">Source: Tableau sample workbook, embedded from Tableau Public.</p>
+</section>
+<section id="app-cta">
+<h2>Try it yourself</h2>
+<p>Reading about order is one thing. Hearing it is better. The Pedalboard Sound Lab lets you rearrange pedals and compare the results.</p>
+<a class="btn" href="app/pedalboard.html">Launch the Pedalboard Sound Lab (web app)</a>
+</section>
+<p class="back-top"><a href="#top">Back to top</a></p>
+</main>
+<footer class="site-footer">
+<ul>
+<li><a href="index.html">Professional site</a></li>
+<li><a href="resume.html">Resume</a></li>
+<li><a href="about.html">About</a></li>
+<li><a href="#top">Back to top</a></li>
+</ul>
+<p>Pedalboard 101 was hand-coded by Jamon Ireland for BYU IS 201. No frameworks were used.</p>
+</footer>
+</body>
+</html>
