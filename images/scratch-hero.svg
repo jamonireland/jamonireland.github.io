@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 340" width="1200" height="340" role="img" aria-labelledby="t d">
+<title id="t">Pedalboard banner</title>
+<desc id="d">Three stylized guitar pedals in amber and charcoal on a dark background with a patch cable running between them.</desc>
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#2b2723"/>
+<stop offset="1" stop-color="#14120f"/>
+</linearGradient>
+<linearGradient id="amb" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#ffc233"/>
+<stop offset="1" stop-color="#d98a00"/>
+</linearGradient>
+</defs>
+<rect width="1200" height="340" fill="url(#bg)"/>
+<g stroke="#3a352f" stroke-width="2">
+<line x1="0" y1="280" x2="1200" y2="280"/>
+<line x1="0" y1="300" x2="1200" y2="300"/>
+<line x1="0" y1="320" x2="1200" y2="320"/>
+</g>
+<path d="M250 190 C 320 250, 380 250, 450 190" fill="none" stroke="#f2e6cf" stroke-width="6" stroke-linecap="round"/>
+<path d="M590 190 C 660 250, 720 250, 790 190" fill="none" stroke="#f2e6cf" stroke-width="6" stroke-linecap="round"/>
+<g transform="translate(110 40)">
+<rect width="170" height="230" rx="14" fill="url(#amb)" stroke="#0e0d0b" stroke-width="4"/>
+<circle cx="45" cy="52" r="20" fill="#26231f"/><circle cx="125" cy="52" r="20" fill="#26231f"/>
+<rect x="42" y="30" width="6" height="16" fill="#ffc233"/><rect x="122" y="30" width="6" height="16" fill="#ffc233"/>
+<circle cx="85" cy="100" r="9" fill="#b91c1c"/>
+<rect x="60" y="130" width="50" height="70" rx="10" fill="#26231f"/>
+<text x="85" y="122" text-anchor="middle" font-family="Georgia, serif" font-size="15" fill="#1b1916" font-weight="bold">DRIVE</text>
+</g>
+<g transform="translate(450 40)">
+<rect width="170" height="230" rx="14" fill="#f2e6cf" stroke="#0e0d0b" stroke-width="4"/>
+<circle cx="45" cy="52" r="20" fill="#26231f"/><circle cx="125" cy="52" r="20" fill="#26231f"/>
+<rect x="42" y="30" width="6" height="16" fill="#ffc233"/><rect x="122" y="30" width="6" height="16" fill="#ffc233"/>
+<circle cx="85" cy="100" r="9" fill="#b91c1c"/>
+<rect x="60" y="130" width="50" height="70" rx="10" fill="#26231f"/>
+<text x="85" y="122" text-anchor="middle" font-family="Georgia, serif" font-size="15" fill="#1b1916" font-weight="bold">DELAY</text>
+</g>
+<g transform="translate(790 40)">
+<rect width="170" height="230" rx="14" fill="url(#amb)" stroke="#0e0d0b" stroke-width="4"/>
+<circle cx="45" cy="52" r="20" fill="#26231f"/><circle cx="125" cy="52" r="20" fill="#26231f"/>
+<rect x="42" y="30" width="6" height="16" fill="#f2e6cf"/><rect x="122" y="30" width="6" height="16" fill="#f2e6cf"/>
+<circle cx="85" cy="100" r="9" fill="#b91c1c"/>
+<rect x="60" y="130" width="50" height="70" rx="10" fill="#26231f"/>
+<text x="85" y="122" text-anchor="middle" font-family="Georgia, serif" font-size="15" fill="#1b1916" font-weight="bold">REVERB</text>
+</g>
+<text x="1010" y="130" font-family="Georgia, serif" font-size="30" fill="#ffc233" font-style="italic">order</text>
+<text x="1010" y="170" font-family="Georgia, serif" font-size="30" fill="#f2e6cf" font-style="italic">shapes</text>
+<text x="1010" y="210" font-family="Georgia, serif" font-size="30" fill="#f2e6cf" font-style="italic">tone</text>
+</svg>
