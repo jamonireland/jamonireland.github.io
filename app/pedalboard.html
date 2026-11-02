@@ -1,0 +1,659 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pedalboard Sound Lab</title>
+<meta name="description" content="Build a guitar pedal chain and hear how order changes the tone. A Web Audio experiment for IS 201.">
+<style>
+:root{
+--bg:#121110; --panel:#1b1917; --panel2:#24211e; --line:#3a3530;
+--amber:#ffb53a; --amber-d:#c98a1c; --text:#f1e9dc; --muted:#b9ad9b;
+--good:#8fd694; --warn:#ffcf5c; --bad:#ff8a70; --ink:#1a1209;
+--r:14px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,#2a2118 0,var(--bg) 60%) fixed,var(--bg);color:var(--text);
+font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%}
+a{color:var(--amber)}
+a:hover{color:#ffd185}
+:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 5px #000}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+header.top{border-bottom:1px solid var(--line);background:rgba(18,17,16,.85)}
+header.top .wrap{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:space-between;padding-top:12px;padding-bottom:12px}
+nav a{display:inline-block;padding:6px 2px;margin-right:16px;font-weight:600;text-decoration:none;border-bottom:2px solid transparent}
+nav a:hover{border-bottom-color:var(--amber)}
+.brand{font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-size:.8rem;color:var(--muted)}
+h1{font-size:clamp(1.9rem,6vw,3rem);line-height:1.05;margin:28px 0 8px;letter-spacing:-.02em}
+h1 span{color:var(--amber)}
+.lede{max-width:62ch;color:var(--muted);margin:0 0 20px}
+h2{font-size:1.1rem;letter-spacing:.08em;text-transform:uppercase;margin:0 0 10px;color:var(--amber)}
+section.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:16px}
+.grid2{display:grid;grid-template-columns:1fr;gap:16px}
+@media(min-width:860px){.grid2{grid-template-columns:1fr 1fr}}
+button{font:inherit;cursor:pointer;color:var(--text);background:var(--panel2);border:1px solid #5a5148;border-radius:10px;padding:8px 14px;min-height:40px}
+button:hover{border-color:var(--amber)}
+button.primary{background:var(--amber);color:var(--ink);border-color:var(--amber);font-weight:700}
+button.primary:hover{background:#ffc766}
+button[aria-pressed="true"]{border-color:var(--amber);color:var(--amber)}
+button.primary[aria-pressed="true"]{color:var(--ink)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.ctl{display:flex;flex-direction:column;gap:2px;min-width:140px;flex:1}
+.ctl label,.knob label{font-size:.82rem;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.ctl output,.knob output{color:var(--text);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--amber);height:28px;background:transparent}
+.chain-line{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:1rem;color:var(--amber);background:#0c0b0a;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-wrap:anywhere}
+canvas#scope{width:100%;height:150px;display:block;background:#0b0a09;border:1px solid var(--line);border-radius:10px}
+.board{display:flex;flex-wrap:wrap;gap:12px;padding:14px;background:repeating-linear-gradient(135deg,#17140f 0 10px,#1a1712 10px 20px);border:2px solid #3a3025;border-radius:var(--r);min-height:120px}
+.endcap{align-self:center;padding:8px 10px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:.85rem;text-align:center}
+.pedal{width:196px;background:linear-gradient(#2c2823,#201d19);border:1px solid #4b433a;border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px;position:relative;box-shadow:0 4px 0 #0008}
+.pedal.on{border-color:var(--amber);box-shadow:0 4px 0 #0008,0 0 18px #ffb53a33}
+.pedal.dragging{opacity:.5}
+.pedal.dropt{outline:2px dashed var(--amber)}
+.pedal h3{margin:0;font-size:1rem;display:flex;align-items:center;gap:8px}
+.led{width:10px;height:10px;border-radius:50%;background:#4a4036;border:1px solid #000;flex:none}
+.pedal.on .led{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.pedal .pos{margin-left:auto;font-size:.75rem;color:var(--muted)}
+.pedal .btns{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:6px}
+.pedal>button[data-act=remove]{margin-top:auto}
+.pedal .btns button{padding:4px 6px;min-height:36px}
+.knob{display:flex;flex-direction:column}
+.tray{display:flex;flex-wrap:wrap;gap:8px}
+.tray button{border-style:dashed}
+.presets{display:flex;flex-wrap:wrap;gap:8px}
+#coach ul{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+#coach li{padding:8px 10px 8px 12px;border-left:4px solid var(--muted);background:#15130f;border-radius:6px}
+#coach li.info b{color:var(--muted)}
+#coach li.good{border-left-color:var(--good)}
+#coach li.warn{border-left-color:var(--warn)}
+#coach li.bad{border-left-color:var(--bad)}
+#coach li b{display:inline-block;min-width:4.2em;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase}
+#coach li.good b{color:var(--good)} #coach li.warn b{color:var(--warn)} #coach li.bad b{color:var(--bad)}
+.goal{font-size:1.15rem;font-weight:700;margin:4px 0 12px}
+.score{font-size:2.4rem;font-weight:800;color:var(--amber);line-height:1}
+.score small{font-size:1rem;color:var(--muted)}
+.tips{margin:8px 0 0;padding-left:20px;color:var(--text)}
+.note{color:var(--muted);font-size:.9rem}
+.status{color:var(--muted);font-size:.9rem}
+footer{border-top:1px solid var(--line);margin-top:24px;padding:20px 0 36px;color:var(--muted);font-size:.9rem}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media(max-width:420px){.pedal{width:100%}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+<nav aria-label="Site"><a href="../scratch.html">&larr; Back to Pedalboard 101</a><a href="../index.html">Professional site</a></nav>
+<span class="brand">Pedalboard Sound Lab</span>
+</div></header>
+<main class="wrap">
+<h1>Pedal order <span>changes everything.</span></h1>
+<p class="lede">Same riff, same pedals, different order, different tone. Build a chain, press Play, then shuffle the pedals and listen. Headphones or speakers on a low volume are best. Sound only starts after you press Play.</p>
+<section class="panel" aria-labelledby="h-play">
+<h2 id="h-play">Guitar and amp</h2>
+<div class="row">
+<button id="btnPlay" class="primary" type="button">&#9654; Play riff</button>
+<button id="btnStop" type="button">&#9632; Stop</button>
+<div class="ctl"><label for="tempo">Tempo <output id="tempoOut">100 BPM</output></label>
+<input id="tempo" type="range" min="60" max="180" step="1" value="100"></div>
+<div class="ctl"><label for="master">Master volume <output id="masterOut">40%</output></label>
+<input id="master" type="range" min="0" max="100" step="1" value="40"></div>
+</div>
+<p class="status" id="status" role="status">Ready. Press Play to wake up the audio engine.</p>
+<canvas id="scope" width="900" height="150" role="img" aria-label="Live oscilloscope and spectrum of the guitar signal. Animates only while sound plays."></canvas>
+<div class="row" style="margin-top:8px">
+<button id="btnViz" type="button" aria-pressed="false">View: Waveform</button>
+<span class="note">The limiter at the end keeps the output from getting painfully loud.</span>
+</div>
+</section>
+<section class="panel" aria-labelledby="h-board">
+<h2 id="h-board">Your pedalboard</h2>
+<p class="chain-line" id="chainLine" aria-live="polite"></p>
+<div class="board" id="board" role="list" aria-label="Pedals in signal order, left to right"></div>
+<p class="note">Drag a card or use the arrow buttons to reorder. The LED shows whether a pedal is on.</p>
+<h2 style="margin-top:14px" id="h-tray">Available pedals</h2>
+<div class="tray" id="tray" role="group" aria-labelledby="h-tray"></div>
+<h2 style="margin-top:14px" id="h-pre">Presets</h2>
+<div class="presets" id="presets" role="group" aria-labelledby="h-pre"></div>
+</section>
+<div class="grid2">
+<section class="panel" id="coach" aria-labelledby="h-coach">
+<h2 id="h-coach">Tone coach</h2>
+<div id="coachBody" aria-live="polite" aria-atomic="true"></div>
+</section>
+<section class="panel" aria-labelledby="h-chal">
+<h2 id="h-chal">Tone challenge</h2>
+<p class="goal" id="goalText"></p>
+<div class="row">
+<button id="btnCheck" class="primary" type="button">Check my board</button>
+<button id="btnNew" type="button">New challenge</button>
+</div>
+<div id="result" aria-live="polite" aria-atomic="true" style="margin-top:12px"></div>
+</section>
+</div>
+</main>
+<footer><div class="wrap">Built with AI assistance (Claude) for Jamon Ireland, IS 201.</div></footer>
+<script>
+"use strict";
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const pct = x => Math.round(x * 100) + '%';
+function curveOD(k){
+const n = 2048, c = new Float32Array(n);
+for (let i = 0; i < n; i++){ const x = i / (n - 1) * 2 - 1; c[i] = Math.tanh(x * k) / Math.tanh(k); }
+return c;
+}
+function curveFuzz(){
+const n = 2048, c = new Float32Array(n);
+for (let i = 0; i < n; i++){
+const x = i / (n - 1) * 2 - 1;
+c[i] = x > 0 ? Math.tanh(x * 6) * 0.8 : Math.tanh(x * 5);
+}
+return c;
+}
+function makeIR(c, seconds){
+const len = Math.floor(c.sampleRate * seconds), buf = c.createBuffer(2, len, c.sampleRate);
+for (let ch = 0; ch < 2; ch++){
+const d = buf.getChannelData(ch); let lp = 0;
+for (let i = 0; i < len; i++){
+const white = Math.random() * 2 - 1;
+lp += (white - lp) * 0.45;
+d[i] = lp * Math.pow(1 - i / len, 3.2);
+}
+}
+return buf;
+}
+function kit(c){
+const nodes = [], stops = [];
+const N = n => (nodes.push(n), n);
+const lfo = (type, hz) => { const o = N(c.createOscillator()); o.type = type; o.frequency.value = hz; o.start(); stops.push(o); return o; };
+return { nodes, stops, N, lfo };
+}
+const ramp = (param, v, c) => param.setTargetAtTime(v, c.currentTime, 0.02);
+const PEDALS = {
+compressor: { name: 'Compressor', blurb: 'Evens out dynamics', params: [
+{ key: 'sustain', label: 'Sustain', min: 0, max: 1, step: .01, def: .5, fmt: pct },
+{ key: 'level', label: 'Level', min: 0, max: 1, step: .01, def: .5, fmt: pct }],
+build(c){
+const k = kit(c), comp = k.N(c.createDynamicsCompressor()), mk = k.N(c.createGain());
+comp.attack.value = .006; comp.release.value = .18; comp.knee.value = 10; comp.connect(mk);
+return { in: comp, out: mk, ...k, set(key, x){
+if (key === 'sustain'){ comp.threshold.value = -10 - x * 40; comp.ratio.value = 3 + x * 14; }
+if (key === 'level') ramp(mk.gain, .8 + x * 2.2, c);
+} };
+} },
+wah: { name: 'Wah / Filter', blurb: 'Sweeping vowel filter', params: [
+{ key: 'sweep', label: 'Pedal position', min: 0, max: 1, step: .01, def: .45, fmt: pct },
+{ key: 'auto', label: 'Auto-wah', min: 0, max: 1, step: .01, def: .5, fmt: pct }],
+build(c){
+const k = kit(c), inp = k.N(c.createGain()), bp = k.N(c.createBiquadFilter()), mk = k.N(c.createGain()), lg = k.N(c.createGain());
+bp.type = 'bandpass'; bp.Q.value = 5; mk.gain.value = 2.4;
+inp.connect(bp); bp.connect(mk);
+const o = k.lfo('sine', 1.6); o.connect(lg); lg.connect(bp.frequency);
+return { in: inp, out: mk, ...k, set(key, x){
+if (key === 'sweep') ramp(bp.frequency, 350 * Math.pow(6, x), c);
+if (key === 'auto') ramp(lg.gain, x * 700, c);
+} };
+} },
+overdrive: { name: 'Overdrive', blurb: 'Warm tube-style crunch', params: [
+{ key: 'drive', label: 'Drive', min: 0, max: 1, step: .01, def: .5, fmt: pct },
+{ key: 'level', label: 'Level', min: 0, max: 1, step: .01, def: .6, fmt: pct }],
+build(c){
+const k = kit(c), pre = k.N(c.createGain()), ws = k.N(c.createWaveShaper()), tone = k.N(c.createBiquadFilter()), post = k.N(c.createGain());
+ws.curve = curveOD(3); ws.oversample = '4x'; tone.type = 'lowpass'; tone.frequency.value = 3800;
+pre.connect(ws); ws.connect(tone); tone.connect(post);
+const st = { drive: .5, level: .6 };
+const apply = () => { pre.gain.value = 2 + st.drive * 22; post.gain.value = (.25 + st.level * 1.2) / (1 + st.drive * 1.5); };
+return { in: pre, out: post, ...k, set(key, x){ st[key] = x; apply(); } };
+} },
+fuzz: { name: 'Fuzz', blurb: 'Fizzy, saturated wall', params: [
+{ key: 'fuzz', label: 'Fuzz', min: 0, max: 1, step: .01, def: .7, fmt: pct },
+{ key: 'level', label: 'Level', min: 0, max: 1, step: .01, def: .5, fmt: pct }],
+build(c){
+const k = kit(c), pre = k.N(c.createGain()), ws = k.N(c.createWaveShaper()), lp = k.N(c.createBiquadFilter()), post = k.N(c.createGain());
+ws.curve = curveFuzz(); ws.oversample = '4x'; lp.type = 'lowpass'; lp.frequency.value = 3000;
+pre.connect(ws); ws.connect(lp); lp.connect(post);
+const st = { fuzz: .7, level: .5 };
+const apply = () => { pre.gain.value = 4 + st.fuzz * 40; post.gain.value = (.12 + st.level * .55); };
+return { in: pre, out: post, ...k, set(key, x){ st[key] = x; apply(); } };
+} },
+chorus: { name: 'Chorus', blurb: 'Shimmering doubled sound', params: [
+{ key: 'rate', label: 'Rate', min: .2, max: 5, step: .05, def: 1.2, fmt: x => x.toFixed(1) + ' Hz' },
+{ key: 'depth', label: 'Depth', min: 0, max: 1, step: .01, def: .5, fmt: pct }],
+build(c){
+const k = kit(c), inp = k.N(c.createGain()), out = k.N(c.createGain()), dl = k.N(c.createDelay(.1)), wet = k.N(c.createGain()), lg = k.N(c.createGain());
+dl.delayTime.value = .022; wet.gain.value = .75;
+inp.connect(out); inp.connect(dl); dl.connect(wet); wet.connect(out);
+const o = k.lfo('sine', 1.2); o.connect(lg); lg.connect(dl.delayTime);
+return { in: inp, out, ...k, set(key, x){
+if (key === 'rate') o.frequency.value = x;
+if (key === 'depth') lg.gain.value = .0015 + x * .006;
+} };
+} },
+tremolo: { name: 'Tremolo', blurb: 'Pulsing volume wobble', params: [
+{ key: 'rate', label: 'Rate', min: .5, max: 12, step: .1, def: 5, fmt: x => x.toFixed(1) + ' Hz' },
+{ key: 'depth', label: 'Depth', min: 0, max: 1, step: .01, def: .6, fmt: pct }],
+build(c){
+const k = kit(c), amp = k.N(c.createGain()), lg = k.N(c.createGain());
+const o = k.lfo('sine', 5); o.connect(lg); lg.connect(amp.gain);
+const st = { depth: .6 };
+return { in: amp, out: amp, ...k, set(key, x){
+if (key === 'rate') o.frequency.value = x;
+if (key === 'depth'){ st.depth = x; amp.gain.value = 1 - x / 2; lg.gain.value = x / 2; }
+} };
+} },
+delay: { name: 'Delay', blurb: 'Echoes that repeat', params: [
+{ key: 'time', label: 'Time', min: .1, max: .9, step: .01, def: .35, fmt: x => Math.round(x * 1000) + ' ms' },
+{ key: 'feedback', label: 'Repeats', min: 0, max: .85, step: .01, def: .4, fmt: x => pct(x / .85) }],
+build(c){
+const k = kit(c), inp = k.N(c.createGain()), out = k.N(c.createGain()), dl = k.N(c.createDelay(1.5)), fb = k.N(c.createGain()), wet = k.N(c.createGain());
+wet.gain.value = .5; fb.gain.value = .4;
+inp.connect(out); inp.connect(dl); dl.connect(wet); wet.connect(out); dl.connect(fb); fb.connect(dl);
+return { in: inp, out, ...k, set(key, x){
+if (key === 'time') ramp(dl.delayTime, x, c);
+if (key === 'feedback') ramp(fb.gain, x, c);
+} };
+} },
+reverb: { name: 'Reverb', blurb: 'A big room around the notes', params: [
+{ key: 'mix', label: 'Mix', min: 0, max: 1, step: .01, def: .4, fmt: pct }],
+build(c){
+const k = kit(c), inp = k.N(c.createGain()), out = k.N(c.createGain()), conv = k.N(c.createConvolver()), dry = k.N(c.createGain()), wet = k.N(c.createGain());
+conv.buffer = makeIR(c, 2.6);
+inp.connect(dry); dry.connect(out); inp.connect(conv); conv.connect(wet); wet.connect(out);
+return { in: inp, out, ...k, set(key, x){
+if (key === 'mix'){ ramp(dry.gain, 1 - x * .55, c); ramp(wet.gain, x * 1.6, c); }
+} };
+} }
+};
+const TYPES = Object.keys(PEDALS);
+const RANK = { wah: 0, compressor: 1, overdrive: 2, fuzz: 3, chorus: 4, tremolo: 5, delay: 6, reverb: 7 };
+let chain = [];
+const built = {};
+let disposeQueue = [];
+function newPedal(type, on = true, over = {}){
+const vals = {};
+PEDALS[type].params.forEach(p => vals[p.key] = (over[p.key] !== undefined ? over[p.key] : p.def));
+return { type, on, vals };
+}
+const active = () => chain.filter(p => p.on);
+let ctx = null, guitarOut, gate, master, limiter, analyser, amp1, amp2;
+let playing = false, schedTimer = null, nextTime = 0, step = 0, tailUntil = 0, rwTimer = null;
+const RIFF = [
+[45, 52, 57, 60, 64, 60, 57, 52],
+[41, 48, 53, 57, 60, 57, 53, 48],
+[48, 55, 60, 64, 67, 64, 60, 55],
+[43, 50, 55, 59, 62, 59, 55, 50]
+].flat();
+const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+function ensureCtx(){
+if (ctx) return;
+const AC = window.AudioContext || window.webkitAudioContext;
+if (!AC) throw new Error('Web Audio is not supported in this browser.');
+ctx = new AC();
+guitarOut = ctx.createGain(); guitarOut.gain.value = 1;
+gate = ctx.createGain();
+amp1 = ctx.createBiquadFilter(); amp1.type = 'highpass'; amp1.frequency.value = 70;
+amp2 = ctx.createBiquadFilter(); amp2.type = 'lowpass'; amp2.frequency.value = 6000;
+master = ctx.createGain();
+limiter = ctx.createDynamicsCompressor();
+limiter.threshold.value = -8; limiter.knee.value = 0; limiter.ratio.value = 20; limiter.attack.value = .002; limiter.release.value = .12;
+const safety = ctx.createGain(); safety.gain.value = .85;
+analyser = ctx.createAnalyser(); analyser.fftSize = 2048; analyser.smoothingTimeConstant = .6;
+gate.connect(amp1); amp1.connect(amp2); amp2.connect(master); master.connect(limiter); limiter.connect(safety); safety.connect(analyser); analyser.connect(ctx.destination);
+setMaster();
+doRewire(true);
+}
+function setMaster(){
+if (!ctx) return;
+const v = +$('#master').value / 100;
+master.gain.setTargetAtTime(Math.pow(v, 2) * 2.2, ctx.currentTime, .02);
+}
+function ensureBuilt(p){
+let b = built[p.type];
+if (!b){
+b = built[p.type] = PEDALS[p.type].build(ctx);
+for (const k in p.vals) b.set(k, p.vals[k]);
+}
+return b;
+}
+function rewire(){
+if (!ctx) return;
+const t = ctx.currentTime;
+gate.gain.cancelScheduledValues(t);
+gate.gain.setTargetAtTime(0, t, .004);
+clearTimeout(rwTimer);
+rwTimer = setTimeout(() => doRewire(false), 30);
+}
+function doRewire(initial){
+if (!ctx) return;
+guitarOut.disconnect();
+Object.values(built).forEach(b => b.out.disconnect());
+let prev = guitarOut;
+for (const p of active()){
+const b = ensureBuilt(p);
+prev.connect(b.in); prev = b.out;
+}
+prev.connect(gate);
+disposeQueue.forEach(b => {
+b.stops.forEach(o => { try { o.stop(); } catch (e) {} });
+b.nodes.forEach(n => { try { n.disconnect(); } catch (e) {} });
+});
+disposeQueue = [];
+const t = ctx.currentTime;
+gate.gain.cancelScheduledValues(t);
+if (initial) gate.gain.setValueAtTime(1, t); else gate.gain.setTargetAtTime(1, t, .012);
+}
+function dropBuilt(type){
+if (built[type]){ disposeQueue.push(built[type]); delete built[type]; }
+}
+function pluck(freq, t, dur, vel){
+const o1 = ctx.createOscillator(), o2 = ctx.createOscillator(), g1 = ctx.createGain(), g2 = ctx.createGain();
+const lp = ctx.createBiquadFilter(), env = ctx.createGain();
+o1.type = 'sawtooth'; o2.type = 'triangle'; o1.frequency.value = freq; o2.frequency.value = freq; o2.detune.value = 7;
+g1.gain.value = .55; g2.gain.value = .6;
+lp.type = 'lowpass'; lp.Q.value = 1.2;
+lp.frequency.setValueAtTime(3600, t); lp.frequency.exponentialRampToValueAtTime(650, t + dur * .9);
+env.gain.setValueAtTime(0.0001, t);
+env.gain.exponentialRampToValueAtTime(.5 * vel, t + .006);
+env.gain.exponentialRampToValueAtTime(.0001, t + dur);
+o1.connect(g1); o2.connect(g2); g1.connect(lp); g2.connect(lp); lp.connect(env); env.connect(guitarOut);
+o1.start(t); o2.start(t); o1.stop(t + dur + .05); o2.stop(t + dur + .05);
+o1.onended = () => { [o1, o2, g1, g2, lp, env].forEach(n => n.disconnect()); };
+}
+function scheduler(){
+const bpm = +$('#tempo').value, eighth = 60 / bpm / 2;
+while (nextTime < ctx.currentTime + .15){
+const m = RIFF[step % RIFF.length];
+pluck(mtof(m), nextTime, Math.max(.5, eighth * 3.2), (step % 8 === 0 ? 1 : .8) * (.9 + Math.random() * .1));
+nextTime += eighth; step++;
+}
+tailUntil = ctx.currentTime + 4;
+}
+function play(){
+ensureCtx();
+const go = () => {
+if (playing) return;
+playing = true; nextTime = ctx.currentTime + .05; step = 0;
+scheduler(); schedTimer = setInterval(scheduler, 30);
+setStatus('Playing: A minor riff (Am - F - C - G). Reorder the pedals while it loops.');
+syncButtons(); kick();
+};
+if (ctx.state === 'suspended') ctx.resume().then(go, go); else go();
+}
+function stop(){
+if (!playing) return;
+playing = false; clearInterval(schedTimer);
+if (ctx) tailUntil = ctx.currentTime + 4;
+setStatus('Stopped. Any echo or reverb tail will ring out.');
+syncButtons();
+}
+function setStatus(t){ $('#status').textContent = t; }
+function syncButtons(){
+$('#btnPlay').setAttribute('aria-pressed', String(playing));
+$('#btnPlay').innerHTML = playing ? '&#9654; Playing&hellip;' : '&#9654; Play riff';
+}
+const cv = $('#scope'), g2d = cv.getContext('2d');
+let vizMode = 'wave', raf = 0, lastDraw = 0;
+const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+function drawIdle(){
+const w = cv.width, h = cv.height;
+g2d.fillStyle = '#0b0a09'; g2d.fillRect(0, 0, w, h);
+g2d.strokeStyle = '#3a3530'; g2d.lineWidth = 1; g2d.beginPath(); g2d.moveTo(0, h / 2); g2d.lineTo(w, h / 2); g2d.stroke();
+g2d.strokeStyle = '#ffb53a'; g2d.lineWidth = 2; g2d.beginPath(); g2d.moveTo(0, h / 2); g2d.lineTo(w, h / 2); g2d.stroke();
+}
+function draw(now){
+raf = 0;
+const live = ctx && (playing || ctx.currentTime < tailUntil);
+if (!live){ drawIdle(); return; }
+if (!reduced.matches || now - lastDraw > 250){
+lastDraw = now;
+const w = cv.width, h = cv.height;
+g2d.fillStyle = '#0b0a09'; g2d.fillRect(0, 0, w, h);
+g2d.strokeStyle = '#2a2622'; g2d.lineWidth = 1;
+for (let i = 1; i < 4; i++){ g2d.beginPath(); g2d.moveTo(0, h * i / 4); g2d.lineTo(w, h * i / 4); g2d.stroke(); }
+g2d.strokeStyle = '#ffb53a'; g2d.fillStyle = '#ffb53a'; g2d.lineWidth = 2;
+if (vizMode === 'wave'){
+const d = new Uint8Array(analyser.fftSize); analyser.getByteTimeDomainData(d);
+g2d.beginPath();
+for (let i = 0; i < d.length; i += 2){ const x = i / d.length * w, y = d[i] / 255 * h; i ? g2d.lineTo(x, y) : g2d.moveTo(x, y); }
+g2d.stroke();
+} else {
+const d = new Uint8Array(analyser.frequencyBinCount); analyser.getByteFrequencyData(d);
+const bars = 96, usable = Math.floor(d.length * .45), bw = w / bars;
+for (let i = 0; i < bars; i++){
+const idx = Math.floor(Math.pow(i / bars, 1.8) * usable), v = d[idx] / 255;
+g2d.fillRect(i * bw + 1, h - v * h, bw - 2, v * h);
+}
+}
+}
+raf = requestAnimationFrame(draw);
+}
+function kick(){ if (!raf) raf = requestAnimationFrame(draw); }
+const boardEl = $('#board'), trayEl = $('#tray');
+function el(tag, attrs = {}, html){
+const e = document.createElement(tag);
+for (const k in attrs) e.setAttribute(k, attrs[k]);
+if (html !== undefined) e.innerHTML = html;
+return e;
+}
+let dragType = null;
+function render(focus){
+boardEl.textContent = '';
+boardEl.appendChild(el('div', { class: 'endcap', 'aria-hidden': 'true' }, 'Guitar<br>IN &rarr;'));
+chain.forEach((p, i) => {
+const def = PEDALS[p.type], name = def.name;
+const card = el('div', { class: 'pedal' + (p.on ? ' on' : ''), role: 'listitem', 'data-type': p.type });
+const head = el('h3', { draggable: 'true', title: 'Drag to reorder' },
+`<span class="led" aria-hidden="true"></span><span>${name}</span><span class="pos">${i + 1}/${chain.length}</span>`);
+head.addEventListener('dragstart', e => { dragType = p.type; card.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', p.type); } catch (x) {} });
+head.addEventListener('dragend', () => { dragType = null; card.classList.remove('dragging'); });
+card.addEventListener('dragover', e => { if (dragType && dragType !== p.type){ e.preventDefault(); card.classList.add('dropt'); } });
+card.addEventListener('dragleave', () => card.classList.remove('dropt'));
+card.addEventListener('drop', e => {
+e.preventDefault(); card.classList.remove('dropt');
+if (!dragType || dragType === p.type) return;
+const from = chain.findIndex(x => x.type === dragType), to = i;
+const [m] = chain.splice(from, 1); chain.splice(to, 0, m);
+changed({ type: m.type, act: 'left' });
+});
+card.appendChild(head);
+const btns = el('div', { class: 'btns' });
+const tg = el('button', { type: 'button', 'data-act': 'toggle', 'data-type': p.type, 'aria-pressed': String(p.on), 'aria-label': `${name}: ${p.on ? 'on' : 'bypassed'}. Press to toggle.` }, p.on ? 'On' : 'Off');
+const lf = el('button', { type: 'button', 'data-act': 'left', 'data-type': p.type, 'aria-label': `Move ${name} left` }, '&#9664;');
+const rt = el('button', { type: 'button', 'data-act': 'right', 'data-type': p.type, 'aria-label': `Move ${name} right` }, '&#9654;');
+if (i === 0) lf.disabled = true;
+if (i === chain.length - 1) rt.disabled = true;
+const rm = el('button', { type: 'button', 'data-act': 'remove', 'data-type': p.type, 'aria-label': `Remove ${name} from the board` }, 'Remove');
+btns.append(tg, lf, rt); card.appendChild(btns);
+def.params.forEach(pr => {
+const id = `s-${p.type}-${pr.key}`;
+const wrap = el('div', { class: 'knob' });
+wrap.appendChild(el('label', { for: id }, `<span>${pr.label}</span><output id="${id}-o">${pr.fmt(p.vals[pr.key])}</output>`));
+const s = el('input', { type: 'range', id, min: pr.min, max: pr.max, step: pr.step, value: p.vals[pr.key], 'aria-label': `${name} ${pr.label}` });
+s.addEventListener('input', () => {
+const x = +s.value; p.vals[pr.key] = x;
+$(`#${id}-o`).textContent = pr.fmt(x);
+if (built[p.type]) built[p.type].set(pr.key, x);
+});
+wrap.appendChild(s); card.appendChild(wrap);
+});
+card.appendChild(rm);
+boardEl.appendChild(card);
+});
+boardEl.appendChild(el('div', { class: 'endcap', 'aria-hidden': 'true' }, '&rarr; Amp<br>OUT'));
+if (!chain.length) boardEl.insertBefore(el('p', { class: 'note', style: 'align-self:center;margin:0' }, 'The board is empty. Add a pedal from the tray below.'), boardEl.lastChild);
+trayEl.textContent = '';
+const free = TYPES.filter(t => !chain.some(p => p.type === t));
+free.forEach(t => {
+const b = el('button', { type: 'button', 'data-act': 'add', 'data-type': t, 'aria-label': `Add ${PEDALS[t].name} to the board. ${PEDALS[t].blurb}.` }, `+ ${PEDALS[t].name}`);
+trayEl.appendChild(b);
+});
+if (!free.length) trayEl.appendChild(el('span', { class: 'note' }, 'Every pedal is on the board. Remove one to put it back in the tray.'));
+const A = active();
+$('#chainLine').textContent = ['Guitar'].concat(A.map(p => PEDALS[p.type].name), ['Amp']).join(' → ');
+renderCoach();
+if (focus){
+let t = boardEl.querySelector(`[data-act="${focus.act}"][data-type="${focus.type}"]`);
+if (t && t.disabled) t = boardEl.querySelector(`[data-act="${focus.act === 'left' ? 'right' : 'left'}"][data-type="${focus.type}"]`);
+if (!t && focus.act === 'add') t = trayEl.querySelector('button');
+if (t) t.focus();
+}
+}
+function changed(focus){
+$('#result').textContent = '';
+render(focus);
+rewire();
+}
+document.addEventListener('click', e => {
+const b = e.target.closest('button[data-act]');
+if (!b) return;
+const type = b.dataset.type, act = b.dataset.act, i = chain.findIndex(p => p.type === type);
+if (act === 'add'){ chain.push(newPedal(type)); changed({ type, act: 'toggle' }); }
+else if (i < 0) return;
+else if (act === 'toggle'){ chain[i].on = !chain[i].on; changed({ type, act }); }
+else if (act === 'left' && i > 0){ [chain[i - 1], chain[i]] = [chain[i], chain[i - 1]]; changed({ type, act }); }
+else if (act === 'right' && i < chain.length - 1){ [chain[i + 1], chain[i]] = [chain[i], chain[i + 1]]; changed({ type, act }); }
+else if (act === 'remove'){ chain.splice(i, 1); dropBuilt(type); changed({ type, act: 'add' }); }
+});
+const PRESETS = {
+'Textbook order': () => [['wah', false], ['compressor'], ['overdrive'], ['chorus'], ['delay'], ['reverb']],
+'Mush mode (reversed)': () => [['reverb', true, { mix: .6 }], ['delay', true, { feedback: .55 }], ['chorus'], ['overdrive', true, { drive: .65 }], ['compressor'], ['wah', false]],
+'Surf': () => [['compressor', true, { sustain: .3 }], ['tremolo', true, { rate: 5.5, depth: .7 }], ['reverb', true, { mix: .75 }]],
+'Heavy': () => [['compressor', true, { sustain: .6 }], ['overdrive', true, { drive: .45 }], ['fuzz', true, { fuzz: .85, level: .45 }], ['delay', true, { time: .18, feedback: .2 }]],
+'Ambient': () => [['compressor', true, { sustain: .4 }], ['overdrive', true, { drive: .25 }], ['chorus', true, { depth: .7 }], ['delay', true, { time: .55, feedback: .6 }], ['reverb', true, { mix: .8 }]]
+};
+const presetsEl = $('#presets');
+Object.keys(PRESETS).forEach(n => presetsEl.appendChild(el('button', { type: 'button', 'data-preset': n }, n)));
+presetsEl.addEventListener('click', e => {
+const b = e.target.closest('button[data-preset]'); if (!b) return;
+loadPreset(b.dataset.preset);
+setStatus('Loaded preset: ' + b.dataset.preset + '.');
+b.focus();
+});
+function loadPreset(name){
+Object.keys(built).forEach(dropBuilt);
+chain = PRESETS[name]().map(([t, on = true, o = {}]) => newPedal(t, on, o));
+changed();
+}
+const GAIN = ['overdrive', 'fuzz'], TIME = ['delay', 'reverb'];
+function analyse(A){
+const idx = t => A.findIndex(p => p.type === t);
+const first = ts => Math.min(...ts.map(idx).filter(i => i >= 0), 99);
+const out = [];
+const add = (level, text) => out.push({ level, text });
+const names = A.map(p => p.type);
+if (!A.length){ add('warn', 'Nothing is switched on, so you are hearing the bare guitar straight into the amp. Honest, but a little plain. Switch a pedal on.'); return out; }
+const gainFirst = first(GAIN), timeFirst = first(TIME);
+const hasGain = gainFirst < 99;
+if (hasGain && timeFirst < gainFirst) add('bad', 'Time-based effects before gain turn into mush. The echoes and room get distorted along with the notes, so everything smears together. Move Delay and Reverb to the right of your gain pedals.');
+if (idx('reverb') >= 0 && idx('delay') >= 0 && idx('reverb') < idx('delay')) add('warn', 'Reverb before Delay means each echo carries its own wash, which gets cloudy fast. Most players put Delay first and let Reverb glue it all together.');
+if (idx('wah') >= 0 && hasGain){
+if (idx('wah') > gainFirst) add('warn', 'Wah after distortion has a different character: the filter sweeps over an already squashed, fizzy signal, so it sounds more like a synth. Wah before gain is the classic vocal quack.');
+else add('good', 'Wah ahead of the gain pedals: the sweep changes how hard you hit the drive, which is the classic expressive sound.');
+}
+if (idx('compressor') >= 0 && hasGain && idx('compressor') > gainFirst) add('warn', 'Compressor after gain squeezes the noise up with the sustain. It can work as a leveller, but up front it tightens your picking before the drive.');
+if (idx('compressor') >= 0 && hasGain && idx('compressor') < gainFirst) add('good', 'Compressor before the gain gives the drive an even, controlled input. Notes feel tighter and sustain longer.');
+if (idx('overdrive') >= 0 && idx('fuzz') >= 0){
+add('info', idx('overdrive') < idx('fuzz') ? 'Overdrive into Fuzz pushes the fuzz harder and thicker. Great for heavy tones, keep the levels in check.' : 'Fuzz into Overdrive tames the fuzz into a tighter, gated growl. Try the swap to hear the difference.');
+}
+['chorus', 'tremolo'].forEach(m => {
+if (idx(m) >= 0 && hasGain && idx(m) < gainFirst) add('warn', `${PEDALS[m].name} before gain gets chewed up by the distortion and sounds gritty. After gain it stays smooth and shimmery.`);
+});
+if (idx('tremolo') >= 0 && idx('reverb') >= 0 && idx('tremolo') > idx('reverb')) add('warn', 'Tremolo after Reverb makes the whole room pulse, which is an odd, seasick effect. Tremolo before Reverb is the surf-style sound.');
+if (!hasGain && A.length) add('info', 'No gain pedal is on, so the tone stays clean. That is fine for surf or ambient, but add Overdrive for bite.');
+const ranks = names.map(n => RANK[n]);
+const sorted = ranks.every((r, i) => !i || r >= ranks[i - 1]);
+if (sorted && A.length >= 3 && !out.some(o => o.level === 'bad' || o.level === 'warn')) out.unshift({ level: 'good', text: 'Textbook order. Dynamics and filters first, then gain, then modulation, then time-based effects. This is the order most pro boards start from.' });
+else if (sorted && A.length >= 3) out.unshift({ level: 'good', text: 'Your pedals sit in the classic order: dynamics, gain, modulation, time. Nice board.' });
+if (!out.length) add('good', 'No problems spotted. Experiment, then swap two neighbours and compare.');
+const bypassed = chain.filter(p => !p.on).length;
+if (bypassed) add('info', `${bypassed} pedal${bypassed > 1 ? 's are' : ' is'} bypassed. They are on the board but not in the sound.`);
+return out;
+}
+function renderCoach(){
+const items = analyse(active());
+const L = { good: 'Nice', warn: 'Heads up', bad: 'Mush', info: 'Note' };
+const ul = el('ul');
+items.forEach(it => ul.appendChild(el('li', { class: it.level }, `<b>${L[it.level]}</b> ${it.text}`)));
+const body = $('#coachBody'); body.textContent = ''; body.appendChild(ul);
+}
+function helpers(){
+const A = active(), idx = t => A.findIndex(p => p.type === t);
+const has = t => idx(t) >= 0, v = (t, k) => A[idx(t)].vals[k];
+const gainIdx = Math.min(...GAIN.map(idx).filter(i => i >= 0), 99);
+const timeIdx = Math.min(...TIME.map(idx).filter(i => i >= 0), 99);
+return { A, idx, has, v, gainIdx, timeIdx, hasGain: gainIdx < 99 };
+}
+const GOALS = [
+{ text: 'Make it sound huge and spacey.', checks: [
+[25, h => h.has('reverb'), 'Add Reverb. Nothing says "spacey" like a big room.'],
+[10, h => h.has('reverb') && h.v('reverb', 'mix') >= .45, 'Turn the Reverb mix above 45% so the room really opens up.'],
+[20, h => h.has('delay'), 'Add Delay. Repeats stretch the notes into the distance.'],
+[10, h => h.hasGain, 'Add a little Overdrive so the wash has some body to bloom from.'],
+[15, h => h.hasGain && h.timeIdx > h.gainIdx, 'Put Delay and Reverb after the gain pedals, otherwise the space gets distorted into mush.'],
+[10, h => h.has('chorus') || h.has('tremolo'), 'Add Chorus or Tremolo for width and movement.'],
+[10, h => h.has('reverb') && h.has('delay') && h.idx('reverb') > h.idx('delay'), 'Place Reverb after Delay so the echoes sit inside the same room.']] },
+{ text: 'Tight and punchy.', checks: [
+[20, h => h.has('compressor'), 'Add the Compressor. It evens out your attack so notes hit consistently.'],
+[15, h => h.has('compressor') && h.hasGain && h.idx('compressor') < h.gainIdx, 'Put the Compressor before your gain pedal to tighten what hits the drive.'],
+[20, h => h.has('overdrive'), 'Add Overdrive for some crunch. A little goes a long way.'],
+[15, h => !h.has('reverb') || h.v('reverb', 'mix') <= .2, 'Remove Reverb or keep its mix under 20%. Big rooms soften the attack.'],
+[10, h => !h.has('delay') || h.v('delay', 'time') <= .2, 'Delay should be absent or a short slapback (under 200 ms) for a tight feel.'],
+[10, h => !h.has('fuzz'), 'Fuzz gets loose and fizzy. Take it off for a tighter sound.'],
+[10, h => h.A.length <= 4, 'Four pedals or fewer keeps things focused. Bypass what you do not need.']] },
+{ text: 'Classic surf splash.', checks: [
+[25, h => h.has('tremolo'), 'Add Tremolo. The pulsing wobble is the heart of surf.'],
+[25, h => h.has('reverb'), 'Add Reverb. Surf guitar lives in a spring-tank splash.'],
+[15, h => h.has('reverb') && h.v('reverb', 'mix') >= .5, 'Push the Reverb mix to 50% or more for that drippy wet sound.'],
+[10, h => h.has('tremolo') && h.has('reverb') && h.idx('tremolo') < h.idx('reverb'), 'Put Tremolo before Reverb so the splash trails behind the pulse.'],
+[15, h => !h.has('fuzz') && (!h.has('overdrive') || h.v('overdrive', 'drive') <= .35), 'Keep it clean: no Fuzz and only light Overdrive.'],
+[10, h => h.has('tremolo') && h.v('tremolo', 'rate') >= 3 && h.v('tremolo', 'rate') <= 8, 'Set the Tremolo rate between 3 and 8 Hz for a classic pulse.']] },
+{ text: 'Thick, angry and heavy.', checks: [
+[30, h => h.has('fuzz'), 'Add Fuzz. It is the backbone of a thick, saturated wall.'],
+[15, h => h.has('fuzz') && h.v('fuzz', 'fuzz') >= .6, 'Turn the Fuzz up to 60% or more.'],
+[10, h => h.has('overdrive'), 'Stack an Overdrive for extra push.'],
+[10, h => h.has('compressor'), 'Add a Compressor to glue the sustain together.'],
+[15, h => h.timeIdx === 99 || (h.hasGain && h.timeIdx > h.gainIdx), 'Move Delay and Reverb after the gain pedals, or remove them.'],
+[10, h => !h.has('reverb') || h.v('reverb', 'mix') <= .3, 'Keep Reverb under 30% so the low end stays defined.'],
+[10, h => !h.has('delay') || h.v('delay', 'feedback') <= .35, 'Lower the Delay repeats so the riff does not blur.']] },
+{ text: 'Funky, quacky and clean.', checks: [
+[30, h => h.has('wah'), 'Add the Wah / Filter for the quack.'],
+[15, h => h.has('wah') && (!h.hasGain || h.idx('wah') < h.gainIdx), 'Put the Wah before any gain pedal so it stays vocal.'],
+[20, h => h.has('compressor'), 'Add the Compressor. Funk loves squeezed, even chords.'],
+[10, h => h.has('wah') && h.v('wah', 'auto') >= .4, 'Raise Auto-wah to 40% or more so it sweeps by itself.'],
+[10, h => !h.has('fuzz'), 'Take the Fuzz off. Funk wants a clean snap.'],
+[10, h => h.has('chorus'), 'A touch of Chorus adds shimmer.'],
+[5, h => !h.has('reverb') || h.v('reverb', 'mix') <= .5, 'Keep Reverb modest, funk is dry and close.']] }
+];
+let goalIdx = Math.floor(Math.random() * GOALS.length);
+function showGoal(){ $('#goalText').textContent = 'Goal: ' + GOALS[goalIdx].text; $('#result').textContent = ''; }
+$('#btnNew').addEventListener('click', () => { goalIdx = (goalIdx + 1 + Math.floor(Math.random() * (GOALS.length - 1))) % GOALS.length; showGoal(); });
+$('#btnCheck').addEventListener('click', () => {
+const h = helpers(), g = GOALS[goalIdx];
+let score = 0; const tips = [];
+g.checks.forEach(([pts, test, tip]) => { let ok = false; try { ok = !!test(h); } catch (e) {} if (ok) score += pts; else tips.push(tip); });
+const verdict = score >= 90 ? 'Dialed in. That is a pro-level board.' : score >= 70 ? 'Strong. A tweak or two and you are there.' : score >= 40 ? 'Getting warmer. Try the tips below.' : 'Far from the goal. Start with the tips below.';
+const r = $('#result'); r.textContent = '';
+r.appendChild(el('div', { class: 'score' }, `${score}<small> / 100</small>`));
+r.appendChild(el('p', { style: 'margin:6px 0 0;font-weight:600' }, verdict));
+if (tips.length){ const ul = el('ul', { class: 'tips' }); tips.forEach(t => ul.appendChild(el('li', {}, t))); r.appendChild(ul); }
+});
+$('#btnPlay').addEventListener('click', () => {
+try { play(); } catch (e) { setStatus(e.message || 'Could not start audio.'); }
+});
+$('#btnStop').addEventListener('click', stop);
+$('#tempo').addEventListener('input', e => { $('#tempoOut').textContent = e.target.value + ' BPM'; });
+$('#master').addEventListener('input', e => { $('#masterOut').textContent = e.target.value + '%'; setMaster(); });
+$('#btnViz').addEventListener('click', e => {
+vizMode = vizMode === 'wave' ? 'spec' : 'wave';
+e.target.textContent = 'View: ' + (vizMode === 'wave' ? 'Waveform' : 'Spectrum');
+e.target.setAttribute('aria-pressed', String(vizMode === 'spec'));
+});
+document.addEventListener('visibilitychange', () => { if (document.hidden && playing) stop(); });
+loadPreset('Textbook order');
+showGoal(); drawIdle(); syncButtons();
+</script>
+</body>
+</html>
